@@ -28,7 +28,7 @@ class Config(object):
     logger.warning("\tPossible call stack: {0:s}({1:d}): {2:s}".format(path, lineno, lines[0].strip()))
     return self.algorithm(className, options)
 
-  def algorithm(self, className, options):
+  def algorithm(self, className, options, streamName='StreamName'):
     # check first argument
     if isinstance(className, unicode): className = className.encode('utf-8')
     if not isinstance(className, str):
@@ -90,6 +90,9 @@ class Config(object):
           except:
             logger.error("There was a problem setting {0:s} to {1} for {2:s}::{3:s}".format(k, v, className, algName))
             raise
+          if streamName in k:
+            self.output(k)
+
     elif ROOT.EL.AnaAlgorithm in parents:
       alg_obj = AnaAlgorithmConfig(className)
       alg_obj.setName(algName)
@@ -105,6 +108,8 @@ class Config(object):
         except:
           logger.error("There was a problem setting {0:s} to {1} for {2:s}::{3:s}".format(k, v, className, algName))
           raise
+        if streamName in k:
+          self.output(k)
     else:
       raise TypeError("Algorithm {0:s} is not an EL::Algorithm or EL::AnaAlgorithm. I do not know how to configure it. {1}".format(className, parents))
 
