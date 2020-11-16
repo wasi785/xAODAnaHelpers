@@ -118,7 +118,6 @@ StatusCode OverlapRemover :: initialize ()
   }
 
   m_event = wk()->xaodEvent();
-  m_store = wk()->xaodStore();
 
   ANA_MSG_INFO( "Number of events in file: " << m_event->getEntries() );
 
@@ -200,7 +199,7 @@ StatusCode OverlapRemover :: execute ()
   executeOR(inElectrons, inMuons, inJets, inPhotons, inTaus, NOMINAL, nullptr, vecOutContainerNames.get());
 
   // look what do we have in TStore
-  if(msgLvl(MSG::VERBOSE)) m_store->print();
+  if(msgLvl(MSG::VERBOSE)) evtStore()->print();
 
   // -----------------------------------------------------------------------------------------------
   //
@@ -303,10 +302,10 @@ StatusCode OverlapRemover :: execute ()
   }
 
   // save list of systs that should be considered down stream
-  ANA_CHECK( m_store->record( std::move(vecOutContainerNames), m_outputAlgoSystNames));
+  ANA_CHECK( evtStore()->record( std::move(vecOutContainerNames), m_outputAlgoSystNames));
 
   // look what do we have in TStore
-  if(msgLvl(MSG::VERBOSE)) m_store->print();
+  if(msgLvl(MSG::VERBOSE)) evtStore()->print();
 
   return StatusCode::SUCCESS;
 
@@ -449,7 +448,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       bool nomContainerNotFound(false);
 
       if( m_useElectrons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
           ANA_CHECK( evtStore()->retrieve(inElectrons, m_inContainerName_Electrons) );
         } else {
           nomContainerNotFound = true;
@@ -458,7 +457,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if( m_useMuons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
           ANA_CHECK( evtStore()->retrieve(inMuons, m_inContainerName_Muons) );
         } else {
           nomContainerNotFound = true;
@@ -466,7 +465,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         }
       }
 
-      if ( m_store->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
+      if ( evtStore()->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
         ANA_CHECK( evtStore()->retrieve(inJets, m_inContainerName_Jets) );
       } else {
         nomContainerNotFound = true;
@@ -474,7 +473,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_usePhotons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
           ANA_CHECK( evtStore()->retrieve(inPhotons, m_inContainerName_Photons) );
         } else {
           nomContainerNotFound = true;
@@ -483,7 +482,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_useTaus ) {
-        if ( m_store->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
           ANA_CHECK( evtStore()->retrieve(inTaus, m_inContainerName_Taus) );
         } else {
           nomContainerNotFound = true;
@@ -549,11 +548,11 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       //
       if ( m_createSelectedContainers ) {
         ANA_MSG_DEBUG(  "Recording");
-        if ( m_useElectrons ){ ANA_CHECK( m_store->record( selectedElectrons,   m_outContainerName_Electrons )); }
-        if ( m_useMuons )    { ANA_CHECK( m_store->record( selectedMuons,  m_outContainerName_Muons )); }
-        ANA_CHECK( m_store->record( selectedJets,  m_outContainerName_Jets ));
-        if ( m_usePhotons )  { ANA_CHECK( m_store->record( selectedPhotons, m_outContainerName_Photons )); }
-        if ( m_useTaus )     { ANA_CHECK( m_store->record( selectedTaus, m_outContainerName_Taus )); }
+        if ( m_useElectrons ){ ANA_CHECK( evtStore()->record( selectedElectrons,   m_outContainerName_Electrons )); }
+        if ( m_useMuons )    { ANA_CHECK( evtStore()->record( selectedMuons,  m_outContainerName_Muons )); }
+        ANA_CHECK( evtStore()->record( selectedJets,  m_outContainerName_Jets ));
+        if ( m_usePhotons )  { ANA_CHECK( evtStore()->record( selectedPhotons, m_outContainerName_Photons )); }
+        if ( m_useTaus )     { ANA_CHECK( evtStore()->record( selectedTaus, m_outContainerName_Taus )); }
       }
 
       sysVecOut->push_back("");
@@ -570,7 +569,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
 
       // these input containers won't change in the electron syst loop ...
       if( m_useMuons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
           ANA_CHECK( evtStore()->retrieve(inMuons, m_inContainerName_Muons) );
         } else {
           nomContainerNotFound = true;
@@ -578,7 +577,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         }
       }
 
-      if ( m_store->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
+      if ( evtStore()->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
         ANA_CHECK( evtStore()->retrieve(inJets, m_inContainerName_Jets) );
       } else {
         nomContainerNotFound = true;
@@ -586,7 +585,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_usePhotons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
           ANA_CHECK( evtStore()->retrieve(inPhotons, m_inContainerName_Photons) );
         } else {
           nomContainerNotFound = true;
@@ -595,7 +594,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_useTaus ) {
-        if ( m_store->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
           ANA_CHECK( evtStore()->retrieve(inTaus, m_inContainerName_Taus) );
         } else {
           nomContainerNotFound = true;
@@ -652,11 +651,11 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         //
         if ( m_createSelectedContainers ) {
           // a different syst varied container will be stored for each syst variation
-          ANA_CHECK( m_store->record( selectedElectrons, m_outContainerName_Electrons + systName ));
-          if ( m_useMuons )  { ANA_CHECK( m_store->record( selectedMuons,     m_outContainerName_Muons + systName )); }
-          ANA_CHECK( m_store->record( selectedJets,      m_outContainerName_Jets + systName ));
-          if ( m_usePhotons ){ ANA_CHECK( m_store->record( selectedPhotons, m_outContainerName_Photons + systName )); }
-          if ( m_useTaus )   { ANA_CHECK( m_store->record( selectedTaus, m_outContainerName_Taus + systName )); }
+          ANA_CHECK( evtStore()->record( selectedElectrons, m_outContainerName_Electrons + systName ));
+          if ( m_useMuons )  { ANA_CHECK( evtStore()->record( selectedMuons,     m_outContainerName_Muons + systName )); }
+          ANA_CHECK( evtStore()->record( selectedJets,      m_outContainerName_Jets + systName ));
+          if ( m_usePhotons ){ ANA_CHECK( evtStore()->record( selectedPhotons, m_outContainerName_Photons + systName )); }
+          if ( m_useTaus )   { ANA_CHECK( evtStore()->record( selectedTaus, m_outContainerName_Taus + systName )); }
         }
 
         sysVecOut->push_back(systName);
@@ -675,7 +674,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
 
       // these input containers won't change in the muon syst loop ...
       if( m_useElectrons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
           ANA_CHECK( evtStore()->retrieve(inElectrons, m_inContainerName_Electrons) );
         } else {
           nomContainerNotFound = true;
@@ -683,7 +682,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         }
       }
 
-      if ( m_store->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
+      if ( evtStore()->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
         ANA_CHECK( evtStore()->retrieve(inJets, m_inContainerName_Jets) );
       } else {
         nomContainerNotFound = true;
@@ -691,7 +690,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_usePhotons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
           ANA_CHECK( evtStore()->retrieve(inPhotons, m_inContainerName_Photons) );
         } else {
           nomContainerNotFound = true;
@@ -700,7 +699,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_useTaus ) {
-        if ( m_store->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
           ANA_CHECK( evtStore()->retrieve(inTaus, m_inContainerName_Taus) );
         } else {
           nomContainerNotFound = true;
@@ -757,11 +756,11 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         if ( m_createSelectedContainers ) {
           // a different syst varied container will be stored for each syst variation
           //
-          if ( m_useElectrons ) { ANA_CHECK( m_store->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
-          ANA_CHECK( m_store->record( selectedMuons,     m_outContainerName_Muons + systName ));
-          ANA_CHECK( m_store->record( selectedJets,      m_outContainerName_Jets + systName ));
-          if ( m_usePhotons )   { ANA_CHECK( m_store->record( selectedPhotons, m_outContainerName_Photons + systName )); }
-          if ( m_useTaus )      { ANA_CHECK( m_store->record( selectedTaus, m_outContainerName_Taus + systName )); }
+          if ( m_useElectrons ) { ANA_CHECK( evtStore()->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
+          ANA_CHECK( evtStore()->record( selectedMuons,     m_outContainerName_Muons + systName ));
+          ANA_CHECK( evtStore()->record( selectedJets,      m_outContainerName_Jets + systName ));
+          if ( m_usePhotons )   { ANA_CHECK( evtStore()->record( selectedPhotons, m_outContainerName_Photons + systName )); }
+          if ( m_useTaus )      { ANA_CHECK( evtStore()->record( selectedTaus, m_outContainerName_Taus + systName )); }
         }
 
         sysVecOut->push_back(systName);
@@ -780,7 +779,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
 
       // these input containers won't change in the jet syst loop ...
       if( m_useElectrons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
           ANA_CHECK( evtStore()->retrieve(inElectrons, m_inContainerName_Electrons) );
         } else {
           nomContainerNotFound = true;
@@ -789,7 +788,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if( m_useMuons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
           ANA_CHECK( evtStore()->retrieve(inMuons, m_inContainerName_Muons) );
         } else {
           nomContainerNotFound = true;
@@ -798,7 +797,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_usePhotons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
           ANA_CHECK( evtStore()->retrieve(inPhotons, m_inContainerName_Photons) );
         } else {
           nomContainerNotFound = true;
@@ -807,7 +806,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_useTaus ) {
-        if ( m_store->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
           ANA_CHECK( evtStore()->retrieve(inTaus, m_inContainerName_Taus) );
         } else {
           nomContainerNotFound = true;
@@ -864,11 +863,11 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         if ( m_createSelectedContainers ) {
           // a different syst varied container will be stored for each syst variation
           //
-          if ( m_useElectrons ) { ANA_CHECK( m_store->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
-          if ( m_useMuons )   { ANA_CHECK( m_store->record( selectedMuons,     m_outContainerName_Muons + systName )); }
-          ANA_CHECK( m_store->record( selectedJets,      m_outContainerName_Jets + systName ));
-          if ( m_usePhotons )   { ANA_CHECK( m_store->record( selectedPhotons, m_outContainerName_Photons + systName )); }
-          if ( m_useTaus )      { ANA_CHECK( m_store->record( selectedTaus, m_outContainerName_Taus + systName )); }
+          if ( m_useElectrons ) { ANA_CHECK( evtStore()->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
+          if ( m_useMuons )   { ANA_CHECK( evtStore()->record( selectedMuons,     m_outContainerName_Muons + systName )); }
+          ANA_CHECK( evtStore()->record( selectedJets,      m_outContainerName_Jets + systName ));
+          if ( m_usePhotons )   { ANA_CHECK( evtStore()->record( selectedPhotons, m_outContainerName_Photons + systName )); }
+          if ( m_useTaus )      { ANA_CHECK( evtStore()->record( selectedTaus, m_outContainerName_Taus + systName )); }
         }
 
         sysVecOut->push_back(systName);
@@ -887,7 +886,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
 
       // these input containers won't change in the photon syst loop ...
       if( m_useElectrons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
           ANA_CHECK( evtStore()->retrieve(inElectrons, m_inContainerName_Electrons) );
         } else {
           nomContainerNotFound = true;
@@ -896,7 +895,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if( m_useMuons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
           ANA_CHECK( evtStore()->retrieve(inMuons, m_inContainerName_Muons) );
         } else {
           nomContainerNotFound = true;
@@ -904,7 +903,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         }
       }
 
-      if ( m_store->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
+      if ( evtStore()->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
         ANA_CHECK( evtStore()->retrieve(inJets, m_inContainerName_Jets) );
       } else {
         nomContainerNotFound = true;
@@ -912,7 +911,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_useTaus ) {
-        if ( m_store->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::TauJetContainer> >(m_inContainerName_Taus) ) {
           ANA_CHECK( evtStore()->retrieve(inTaus, m_inContainerName_Taus) );
         } else {
           nomContainerNotFound = true;
@@ -970,11 +969,11 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         if ( m_createSelectedContainers ) {
           // a different syst varied container will be stored for each syst variation
           //
-          if( m_useElectrons ){ ANA_CHECK( m_store->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
-          if( m_useMuons )    { ANA_CHECK( m_store->record( selectedMuons,     m_outContainerName_Muons + systName )); }
-          ANA_CHECK( m_store->record( selectedJets,      m_outContainerName_Jets + systName ));
-          ANA_CHECK( m_store->record( selectedPhotons,   m_outContainerName_Photons + systName ));
-          if ( m_useTaus )    { ANA_CHECK( m_store->record( selectedTaus, m_outContainerName_Taus + systName )); }
+          if( m_useElectrons ){ ANA_CHECK( evtStore()->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
+          if( m_useMuons )    { ANA_CHECK( evtStore()->record( selectedMuons,     m_outContainerName_Muons + systName )); }
+          ANA_CHECK( evtStore()->record( selectedJets,      m_outContainerName_Jets + systName ));
+          ANA_CHECK( evtStore()->record( selectedPhotons,   m_outContainerName_Photons + systName ));
+          if ( m_useTaus )    { ANA_CHECK( evtStore()->record( selectedTaus, m_outContainerName_Taus + systName )); }
         }
 
         sysVecOut->push_back(systName);
@@ -993,7 +992,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
 
       // these input containers won't change in the tau syst loop ...
       if( m_useElectrons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::ElectronContainer> >(m_inContainerName_Electrons) ) {
           ANA_CHECK( evtStore()->retrieve(inElectrons, m_inContainerName_Electrons) );
         } else {
           nomContainerNotFound = true;
@@ -1002,7 +1001,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if( m_useMuons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::MuonContainer> >(m_inContainerName_Muons) ) {
           ANA_CHECK( evtStore()->retrieve(inMuons, m_inContainerName_Muons) );
         } else {
           nomContainerNotFound = true;
@@ -1010,7 +1009,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         }
       }
 
-      if ( m_store->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
+      if ( evtStore()->contains<ConstDataVector<xAOD::JetContainer> >(m_inContainerName_Jets) ) {
         ANA_CHECK( evtStore()->retrieve(inJets, m_inContainerName_Jets) );
       } else {
         nomContainerNotFound = true;
@@ -1018,7 +1017,7 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
       }
 
       if ( m_usePhotons ) {
-        if ( m_store->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
+        if ( evtStore()->contains<ConstDataVector<xAOD::PhotonContainer> >(m_inContainerName_Photons) ) {
           ANA_CHECK( evtStore()->retrieve(inPhotons, m_inContainerName_Photons) );
         } else {
           nomContainerNotFound = true;
@@ -1075,11 +1074,11 @@ StatusCode OverlapRemover :: executeOR(  const xAOD::ElectronContainer* inElectr
         if ( m_createSelectedContainers ) {
           // a different syst varied container will be stored for each syst variation
           //
-          if( m_useElectrons ) { ANA_CHECK( m_store->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
-          if( m_useMuons )     { ANA_CHECK( m_store->record( selectedMuons,     m_outContainerName_Muons + systName )); }
-          ANA_CHECK( m_store->record( selectedJets,      m_outContainerName_Jets + systName ));
-          if ( m_usePhotons )  { ANA_CHECK( m_store->record( selectedPhotons,   m_outContainerName_Photons + systName )); }
-          ANA_CHECK( m_store->record( selectedTaus, m_outContainerName_Taus + systName ));
+          if( m_useElectrons ) { ANA_CHECK( evtStore()->record( selectedElectrons, m_outContainerName_Electrons + systName )); }
+          if( m_useMuons )     { ANA_CHECK( evtStore()->record( selectedMuons,     m_outContainerName_Muons + systName )); }
+          ANA_CHECK( evtStore()->record( selectedJets,      m_outContainerName_Jets + systName ));
+          if ( m_usePhotons )  { ANA_CHECK( evtStore()->record( selectedPhotons,   m_outContainerName_Photons + systName )); }
+          ANA_CHECK( evtStore()->record( selectedTaus, m_outContainerName_Taus + systName ));
         }
 
         sysVecOut->push_back(systName);
