@@ -93,10 +93,6 @@ class Config(object):
           # if the key is a stream name pattern, register it automatically
           if streamName in k:
             self.output(k)
-      # additionally, look at the algorithm and see if it has any default streamName set
-      for k,v in dir(alg_obj):
-        if streamName not in k: continue
-        self.output(v)
 
     elif ROOT.EL.AnaAlgorithm in parents:
       alg_obj = AnaAlgorithmConfig(className)
@@ -116,10 +112,6 @@ class Config(object):
         # if the key is a stream name pattern, register it automatically
         if streamName in k:
           self.output(k)
-      # additionally, look at the algorithm and see if it has any default streamName set
-      for k,v in dir(alg_obj):
-        if streamName not in k: continue
-        self.output(v)
     else:
       raise TypeError("Algorithm {0:s} is not an EL::Algorithm or EL::AnaAlgorithm. I do not know how to configure it. {1}".format(className, parents))
 
