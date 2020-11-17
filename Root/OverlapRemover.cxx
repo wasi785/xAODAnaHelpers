@@ -197,7 +197,6 @@ StatusCode OverlapRemover :: execute ()
   executeOR(inElectrons, inMuons, inJets, inPhotons, inTaus, NOMINAL, nullptr, vecOutContainerNames.get());
 
   // look what do we have in TStore
-  if(msgLvl(MSG::VERBOSE)) evtStore()->print();
 
   // -----------------------------------------------------------------------------------------------
   //
@@ -303,7 +302,6 @@ StatusCode OverlapRemover :: execute ()
   ANA_CHECK( evtStore()->record( std::move(vecOutContainerNames), m_outputAlgoSystNames));
 
   // look what do we have in TStore
-  if(msgLvl(MSG::VERBOSE)) evtStore()->print();
 
   return StatusCode::SUCCESS;
 
